@@ -121,7 +121,7 @@ int main(int argc, char* argv[])
 						//push to stack if stack is empty
 						operators.push(expression[i]);
 					}
-					else if (calculator.precedence(expression[i]) >= calculator.precedence(operators.top()))
+					else if (calculator.precedence(expression[i]) > calculator.precedence(operators.top()))
 					{
 						//if expression[i] have a higher or equal precendence to operator on top of the stack, push
 						operators.push(expression[i]);
@@ -135,7 +135,7 @@ int main(int argc, char* argv[])
 							calculator.execute(operands, operators, result);
 						}
 						//push the operator
-						operators.push(expression[1]);
+						operators.push(expression[i]);
 					}
 					break;
 				case ')':
