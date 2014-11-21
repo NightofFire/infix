@@ -4,169 +4,176 @@
 #include <stack>
 #include <cmath>
 #include <sstream>
+#include <fstream>
 #include <iomanip> 
+#include "Calculator.h"
 using namespace std;
 
-int precedence(char p)
+int main(int argc, char* argv[])
 {
-	if (p == '+' || p == '-')
-		return 1;
-	else if (p == '*' || p == '/')
-		return 2;
-	else if (p == '^')
-		return 3;
-	else if (p == '(' || p == ')')
-		return 0;
-}
-void execute(stack<double> & operands, stack<char> &operators, double &result)
-{
-	double operand1 = 0;
-	double operand2 = 0;
-	char operator1;
-
-	operand2 = operands.top();
-	operands.pop();
-	operand1 = operands.top();
-	operands.pop();
-	operator1 = operators.top();
-	operators.pop();
-	//cout << operator1 << endl;
-	if (operator1 == '+')
+	ifstream file;
+	if (argc > 1 && argc < 3)
 	{
-		cout << operand1 << " + " << operand2 << endl;
-		result = operand1 + operand2;
-	}
-	else if (operator1 == '-')
-	{
-		cout << operand1 << " - " << operand2 << endl;
-		result = operand1 - operand2;
-	}
-	else if (operator1 == '*')
-	{
-		cout << operand1 << " * " << operand2 << endl;
-		result = operand1 * operand2;
-	}
-	else if (operator1 == '/')
-	{
-		cout << operand1 << " / " << operand2 << endl;
-		result = operand1 / operand2;
-	}
-	else
-	{
-		cout << operand1 << " ^ " << operand2 << endl;
-		result = pow(operand1, operand2);
-	}
-	operands.push(result);
-	cout << "finish execute " << endl;
-}
-int main()
-{
-	if (isdigit('a'))
-		cout << "dsadas" << endl;
-	stack<double> operands;
-	stack<char> operators;
-	double result;
-	string line;
-	string temp;
-	string hey;
-	char exp[100];
-	cout << "Enter an expression" << endl;
-	getline(cin, line);
-	stringstream ss;
-	ss << line;
-	while (ss >> temp)
-	{
-		hey += temp;
-	}
-	//cout << hey << endl;
-
-	for (int i = 0; i < hey.length(); i++)
-	{
-		if (isdigit(hey[i]))
+		file.open(argv[1]);
+		if (!file.is_open())
 		{
-			int startPos = i;
-			while (i != hey.length() && hey[i] != '+' && hey[i] != '-' && hey[i] != '*' && hey[i] != '/' && hey[i] != '^')
-			{
-				//cout << hey[i] << endl;
-				i++;
-			}
-			int endPos = i;
-			int length = endPos - startPos;
-			string temp = hey.substr(startPos, length);
-			//cout << temp << endl;
-			double value = stod(temp);
-			operands.push(value);
-			i--;
-			//cout << "value : "<< value << endl;
-			/*istringstream convert(hey[i]);
-			double temp;
-			convert >> temp;
-			cout << temp << endl;
-			operands.push(temp);*/
+			exit(1);
+			cerr << "Invalid file" << endl;
+		}
+		cout << "1" << endl;
+	}
+	Calculator calculator;
+	string line;
+	while (true)
+	{
+		cout << "Enter an expression" << endl;
+		if (argc > 1 && getline(file,line))
+		{
 		}
 		else
 		{
-			cout << "ENTERED" << endl;
-			//cout << hey[i] << endl;
-			switch (hey[i])
-			{
-			case '(':
-				operators.push(hey[i]);
-				cout << hey[i] << endl;
-				break;
-			case '+': case '-': case '*': case '/': case '^':
-				if (operators.empty())
-				{
-					cout << hey[i] << endl;
-					operators.push(hey[i]);
-				}
-				else if (precedence(hey[i]) >= precedence(operators.top()))
-				{
-					//cout << "+" << endl;
-					cout << "2 " << hey[i] << endl;
-					operators.push(hey[i]);
-					//cout << "+1" << endl;
-				}
-				else
-				{
-					cout << "3 " << hey[i] << endl;
-					while (!operators.empty() && precedence(hey[i]) <= precedence(operators.top()))
-					{
-						execute(operands, operators, result);
-					}
-					operators.push(hey[1]);
-				}
-				break;
-			case ')':
-				cout << ")" << endl;
-				while (operators.top() != '(')
-				{
-					execute(operands, operators, result);
-				}
-				operators.pop();
-				break;
+			getline(cin, line);
+		}
+		string expression;
+		stringstream ss;
+		string temp;
+		ss << line;
+		while (ss >> temp)
+		{
+			expression += temp;
+		}
+		cout << expression << endl;
+		if (line == "")
+		{
+			continue;
+		}
+		stack<double> operands;
+		stack<char> operators;
+		double result;
+		bool skip = false;
+		int parenCounter = 0;
+		
+		//getline(cin, line);
 
-			default:
-				cerr << "ERROR" << endl;
+		//cout << expression << endl;
+
+		for (int i = 0; i < expression.length(); i++)
+		{
+			if (isdigit(expression[i]))
+			{
+				int startPos = i;
+				while (i != expression.length() && !calculator.isOperator(expression[i]))
+				{
+					//cout << expression[i] << endl;
+					i++;
+				}
+				int endPos = i;
+				int length = endPos - startPos;
+				string temp = expression.substr(startPos, length);
+				//cout << temp << endl;
+				double value = stod(temp);
+				operands.push(value);
+				i--;
+				//cout << "value : "<< value << endl;
+				/*istringstream convert(expression[i]);
+				double temp;
+				convert >> temp;
+				cout << temp << endl;
+				operands.push(temp);*/
+			}
+			else if (isalpha(expression[i]))
+			{
+				skip = true;
 				break;
 			}
+			else
+			{
+				if (expression[i] == '(')
+				{
+					parenCounter++;
+				}
+				else if (expression[i] == ')')
+				{
+					parenCounter--;
+					if (parenCounter < 0)
+					{
+						break;
+					}
+				}
+				/*if (parenCounter<0 || parenCounter>0)
+				{
+					cout << "error" << endl;
+					exit(1);
+				}*/
+				cout << "ENTERED" << endl;
+				//cout << expression[i] << endl;
+				switch (expression[i])
+				{
+				case '(':
+					operators.push(expression[i]);
+					cout << expression[i] << endl;
+					break;
+				case '+': case '-': case '*': case '/': case '^':
+					if (operators.empty())
+					{
+						cout << expression[i] << endl;
+						operators.push(expression[i]);
+					}
+					else if (calculator.precedence(expression[i]) >= calculator.precedence(operators.top()))
+					{
+						//cout << "+" << endl;
+						cout << "2 " << expression[i] << endl;
+						operators.push(expression[i]);
+						//cout << "+1" << endl;
+					}
+					else
+					{
+						cout << "3 " << expression[i] << endl;
+						while (!operators.empty() && calculator.precedence(expression[i]) <= calculator.precedence(operators.top()))
+						{
+							calculator.execute(operands, operators, result);
+						}
+						operators.push(expression[1]);
+					}
+					break;
+				case ')':
+					cout << ")" << endl;
+					if (operators.top() == '(')
+					{
+						skip = true;
+					}
+					else
+					{
+						while (operators.top() != '(')
+						{
+							calculator.execute(operands, operators, result);
+						}
+						operators.pop();
+					}
+					break;
+
+				default:
+					cerr << "ERROR" << endl;
+					break;
+				}
+			}
+		}
+		if (!skip && parenCounter == 0)
+		{
+			while (!operators.empty())
+			{
+				cout << "popping" << endl;
+				cout << operators.top() << endl;
+				calculator.execute(operands, operators, result);
+				cout << "finish popping" << endl;
+			}
+			result = operands.top();
+			//cout << operands.top() << endl;
+			//cout << operators.top() << endl;
+			//execute(operands, operators, result);
+			//execute(operands, operators, result);
+			cout << "The result is " << setprecision(4) << result << " = " << line << endl;
 		}
 	}
-	while (!operators.empty())
-	{
-		cout << "popping" << endl;
-		cout << operators.top() << endl;
-		execute(operands, operators, result);
-		//operators.pop();
-		cout << "finish popping" << endl;
-	}
-	result = operands.top();
-	//cout << operands.top() << endl;
-	//cout << operators.top() << endl;
-	//execute(operands, operators, result);
-	//execute(operands, operators, result);
-	cout << "The result is " << setprecision(2) << result << endl;
-
-
 	return 0;
 }
