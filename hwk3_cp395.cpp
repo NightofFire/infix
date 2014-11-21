@@ -38,11 +38,13 @@ int main(int argc, char* argv[])
 	{
 		if (argc > 1 && getline(file,line))
 		{
+
 		}
 		else
 		{
 			cout << "Enter an expression" << endl;
 			getline(cin, line);
+			//if end of file, exit
 			if (cin.eof())
 			{
 				exit(0);
@@ -170,6 +172,13 @@ int main(int argc, char* argv[])
 			result = operands.top();
 			//output the result
 			cout << fixed << setprecision(3) << result << " = " << line << endl;
+		}
+		if (argc > 1)	//detect end of file
+		{
+			if (file.eof())
+			{
+				exit(0);
+			}
 		}
 	}
 	return 0;
